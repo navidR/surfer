@@ -44,6 +44,23 @@ if(NOT CURL_VERSION)
 endif()
 message(STATUS "libcurl version set : ${CURL_VERSION}" )
 
+# Config for curl
+set(BUILD_CURL_EXE off)
+set(CURL_STATICLIB on)
+set(ENABLE_ARES off)
+set(CURL_DISABLE_LDAP on)
+set(CURL_DISABLE_TELNET on)
+set(CURL_DISABLE_TFTP on)
+set(CURL_DISABLE_LDAPS on)
+set(CURL_DISABLE_RTSP on)
+set(CURL_DISABLE_POP3 on)
+set(CURL_DISABLE_IMAP on)
+set(CURL_DISABLE_SMTP on)
+set(CURL_DISABLE_GOPHER on)
+set(CURL_DISABLE_CRYPTO_AUTH on)
+set(ENABLE_IPV6 off)
+set(ENABLE_MANUAL off)
+
 set(curl_configure_options "--disable-shared --without-ssl --disable-ares --disable-cookies --disable-crypto-auth --disable-ipv6 --disable-manual --disable-versioned-symbols --without-librtmp --without-zlib")
 
 # Download and unzip libcurl
@@ -78,8 +95,23 @@ ExternalProject_Add(
     # Force separate output paths for debug and release builds to allow easy
     # identification of correct lib in subsequent TARGET_LINK_LIBRARIES commands
     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-               -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG:PATH=curl_debug_output
-               -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE:PATH=curl_release_output
+              -DBUILD_CURL_EXE=${BUILD_CURL_EXE}
+              -DCURL_STATICLIB=${CURL_STATICLIB}
+              -DENABLE_ARES=${ENABLE_ARES}
+              -DCURL_DISABLE_LDAP=${CURL_DISABLE_LDAP}
+              -DCURL_DISABLE_TELNET=${CURL_DISABLE_TELNET}
+              -DCURL_DISABLE_TFTP=${CURL_DISABLE_TFTP}
+              -DCURL_DISABLE_LDAPS=${CURL_DISABLE_LDAPS}
+              -DCURL_DISABLE_RTSP=${CURL_DISABLE_RTSP}
+              -DCURL_DISABLE_POP3=${CURL_DISABLE_POP3}
+              -DCURL_DISABLE_IMAP=${CURL_DISABLE_IMAP}
+              -DCURL_DISABLE_SMTP=${CURL_DISABLE_SMTP}
+              -DCURL_DISABLE_GOPHER=${CURL_DISABLE_GOPHER}
+              -DCURL_DISABLE_CRYPTO_AUTH=${CURL_DISABLE_CRYPTO_AUTH}
+              -DENABLE_IPV6=${ENABLE_IPV6}
+              -DENABLE_MANUAL=${ENABLE_MANUAL}
+               #-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG:PATH=curl_debug_output
+               #-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE:PATH=curl_release_output
     # Disable install step
     INSTALL_COMMAND ""
     BUILD_COMMAND "make" -j${_JOB}
