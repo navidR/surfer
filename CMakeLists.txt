@@ -3,7 +3,7 @@ project(MatrixC)
 
 # Compiler Options
 set (CMAKE_CXX_STANDARD 11)
-set (_JOB 18)
+set (_JOB 4)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(main_executable surfer)
@@ -44,11 +44,14 @@ if(NOT CURL_VERSION)
 endif()
 message(STATUS "libcurl version set : ${CURL_VERSION}" )
 
+set(curl_configure_options "--disable-shared --without-ssl --disable-ares --disable-cookies --disable-crypto-auth --disable-ipv6 --disable-manual --disable-versioned-symbols --without-librtmp --without-zlib")
 
 # Download and unzip libcurl
-set(curl_url "https://github.com/curl/curl/archive/curl-${CURL_VERSION}.zip")
-set(download_path ${thirdparty})
-set(extract_path ${thirdpaty}/libcurl)
+set(curl_zip "curl-${CURL_VERSION}.zip")
+set(curl_folder libcurl)
+set(curl_url "https://github.com/curl/curl/archive/${curl_zip}")
+set(download_path ${thirdparty}/${curl_zip})
+set(extract_path ${thirdpaty}/${curl_folder})
 
 if (NOT EXISTS "${download_path}")
     file(DOWNLOAD "${curl_url}" "${download_path}")
@@ -64,7 +67,7 @@ add_custom_command(
 ExternalProject_Add(
     libcurl
     SOURCE_DIR ${thirdparty}/libcurl
-    URL ${thirdparty}/libcurl-release-${CURL_VERSION}.tar
+    URL ${thirdparty}/curl-${CURL_VERSION}.zip
     TMP_DIR ${CMAKE_SOURCE_DIR}/build
     #GIT_REPOSITORY git@github.com:google/libcurl.git
     #GIT_TAG release-${CURL_VERSION}
@@ -107,8 +110,8 @@ set(pthread "-pthread")
 target_link_libraries(
     ${main_executable}
     ${Boost_LIBRARIES}
-    optimized ${binary_dir_libcurl}/gtest/ReleaseLibs/${CMAKE_FIND_LIBRARY_PREFIXES}gtest${suffix}
-    debug ${binary_dir_libcurl}/DebugLibs/${CMAKE_FIND_LIBRARY_PREFIXES}gmock${suffix}
+    optimized ${binary_dir_libcurl}/lib/${CMAKE_FIND_LIBRARY_PREFIXES}curl${suffix}
+    debug ${binary_dir_libcurl}/lib/${CMAKE_FIND_LIBRARY_PREFIXES}curl${suffix}
     ${CMAKE_THREAD_LIBS_INIT})
 
 add_custom_target(
