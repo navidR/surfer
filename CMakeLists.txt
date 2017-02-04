@@ -1,18 +1,16 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(MatrixC)
+project(surfer)
 
 # Compiler Options
 set (CMAKE_CXX_STANDARD 11)
-set (_JOB 4)
+set (_JOB 16)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(main_executable surfer)
 set(thirdparty ${CMAKE_SOURCE_DIR}/thirdparty)
-set(curl_debug_output )
-set(curl_release_output )
+set(linux_libs ssh2 ssl crypto z)
 
 # Threads
-find_package(Threads)
 #find_package(CURL)
 
 # Boost Library
@@ -137,14 +135,31 @@ message(STATUS "libcurl source directory : ${source_dir_libcurl}")
 message(STATUS "libcurl binary directory : ${binary_dir_libcurl}")
 
 # Final Executable Config
-set(suffix ".a")
-set(pthread "-pthread")
-target_link_libraries(
-    ${main_executable}
-    ${Boost_LIBRARIES}
-    optimized ${binary_dir_libcurl}/lib/${CMAKE_FIND_LIBRARY_PREFIXES}curl${suffix}
-    debug ${binary_dir_libcurl}/lib/${CMAKE_FIND_LIBRARY_PREFIXES}curl${suffix}
-    ${CMAKE_THREAD_LIBS_INIT})
+if(UNIX)
+    set(suffix ".a")
+elseif(WIN32)
+    set(suffix ".lib")
+endif()
+
+if(APPLE)
+    target_link_libraries(
+        ${main_executable}
+        ${Boost_LIBRARIES}
+        optimized ${binary_dir_libcurl}/lib/${CMAKE_FIND_LIBRARY_PREFIXES}curl${suffix}
+        debug ${binary_dir_libcurl}/lib/${CMAKE_FIND_LIBRARY_PREFIXES}curl${suffix}
+    )
+endif()
+
+if(UNIX AND NOT APPLE)
+    # for Linux, BSD, Solaris, Minix
+    target_link_libraries(
+        ${main_executable}
+        ${Boost_LIBRARIES}
+        optimized ${binary_dir_libcurl}/lib/${CMAKE_FIND_LIBRARY_PREFIXES}curl${suffix}
+        debug ${binary_dir_libcurl}/lib/${CMAKE_FIND_LIBRARY_PREFIXES}curl${suffix}
+        ${linux_libs}
+    )
+endif()
 
 add_custom_target(
   run

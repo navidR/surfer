@@ -1,4 +1,6 @@
 #include <string>
+#include <iostream>
+#include <fstream>
 
 using std::string;
 
@@ -15,9 +17,9 @@ namespace po = boost::program_options;
 using boost::format;
 using boost::exception;
 
-
 #include <curl/curl.h>
 
+#define ERR 0xFFFFFFF1
 
 int main(int argc, char ** argv)
 {
@@ -27,6 +29,11 @@ int main(int argc, char ** argv)
     string tor;
     string folder_name;
     bool download = false;
+
+    std::ofstream allFiles;
+    allFiles.open("allFiles.txt");
+    std::ofstream existingFiles;
+    existingFiles.open("existingFiles.txt");
 
     po::options_description desc("Options");
     desc.add_options()
@@ -120,23 +127,31 @@ int main(int argc, char ** argv)
         BOOST_LOG_TRIVIAL(fatal) << "couldn't initilize curl";
         return 1;
     }
-    curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5); 
-    curl_easy_setopt(curl, CURLOPT_PROXY, tor.c_str());
-    
-
-
-
-
+  
     // Checking
     for(long long i = start; i < end; ++i) {
         try{
             string t = (format(url.c_str()) % i).str();
-            BOOST_LOG_TRIVIAL(info) << t;
+            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5); 
+            curl_easy_setopt(curl, CURLOPT_PROXY, tor.c_str());
+            curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+            curl_easy_setopt(curl, CURLOPT_URL, t.c_str());
+            res = curl_easy_perform(curl);
+            if(res == CURLE_OK) {
+                long response_code;
+                curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+                BOOST_LOG_TRIVIAL(info) << t  << " " << response_code;
+                allFiles << t << " -- " << response_code << "\n";
+                if(response_code <= 400){
+                    existingFiles << t << "\n";
+                }
+            }
+            else {
+                BOOST_LOG_TRIVIAL(error) << "Couldn't execute curl_easy_perform, error code : " << res << " : " << curl_easy_strerror(res); 
+            }
         } catch(exception& e){
             BOOST_LOG_TRIVIAL(fatal) << "Wrong format " << boost::diagnostic_information(e);
         }
-       
-
     }
 
     // Downloading
