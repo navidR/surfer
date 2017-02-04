@@ -17,7 +17,7 @@ find_package(Threads)
 
 # Boost Library
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS filesystem log system log_setup date_time thread regex chrono atomic REQUIRED)
+find_package(Boost COMPONENTS filesystem log program_options system log_setup date_time thread regex chrono atomic REQUIRED)
 
 message(STATUS "Boost library directories : ${Boost_LIBRARY_DIRS}")
 message(STATUS "Boost library : ${Boost_LIBRARIES}")
