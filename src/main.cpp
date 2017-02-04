@@ -16,11 +16,15 @@ using boost::format;
 using boost::exception;
 
 
+#include <curl/curl.h>
+
+
 int main(int argc, char ** argv)
 {
     long long start = 0;
     long long end = 0;
     string url;
+    string tor;
     string folder_name;
     bool download = false;
 
@@ -32,10 +36,10 @@ int main(int argc, char ** argv)
         ("download", po::value<bool>(), "Should download files or not")
         ("url", po::value<string>(), "Url of The page to try every possible file between start and end in the form of C-style prlong longf")
         ("folder_name", po::value<string>(), "folder name to download")
+        ("tor", po::value<string>(), "tor ip port like 127.0.0.1:9999")
     ;
 
     po::variables_map vm;
-
     try {
         po::store(po::parse_command_line(argc, argv, desc), vm);
         po::notify(vm);
@@ -56,6 +60,15 @@ int main(int argc, char ** argv)
         url = vm["url"].as<string>();
     } else {
         BOOST_LOG_TRIVIAL(error) << "url should be provided.";
+        return 1;
+    }
+
+    if (vm.count("tor")) {
+        BOOST_LOG_TRIVIAL(info) << "tor address is : " 
+        << vm["tor"].as<string>();
+        tor = vm["tor"].as<string>();
+    } else {
+        BOOST_LOG_TRIVIAL(error) << "tor address should be provided.";
         return 1;
     }
 
@@ -99,6 +112,21 @@ int main(int argc, char ** argv)
     }
 
 
+    CURL *curl; 
+    CURLcode res;
+    curl_global_init(CURL_GLOBAL_DEFAULT); 
+    curl = curl_easy_init(); 
+        if(!curl) {
+        BOOST_LOG_TRIVIAL(fatal) << "couldn't initilize curl";
+        return 1;
+    }
+    curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5); 
+    curl_easy_setopt(curl, CURLOPT_PROXY, tor.c_str());
+    
+
+
+
+
     // Checking
     for(long long i = start; i < end; ++i) {
         try{
@@ -107,7 +135,7 @@ int main(int argc, char ** argv)
         } catch(exception& e){
             BOOST_LOG_TRIVIAL(fatal) << "Wrong format " << boost::diagnostic_information(e);
         }
-        
+       
 
     }
 
