@@ -141,17 +141,21 @@ elseif(WIN32)
     set(suffix ".lib")
 endif()
 
+message(STATUS "suffix for this platform : ${suffix}")
+
 if(APPLE)
+    message(STATUS "Link and Compile on Apple")
     target_link_libraries(
         ${main_executable}
         ${Boost_LIBRARIES}
         optimized ${binary_dir_libcurl}/lib/${CMAKE_FIND_LIBRARY_PREFIXES}curl${suffix}
         debug ${binary_dir_libcurl}/lib/${CMAKE_FIND_LIBRARY_PREFIXES}curl${suffix}
+        ssh2 ssl crypto z
     )
 endif()
 
 if(UNIX AND NOT APPLE)
-    # for Linux, BSD, Solaris, Minix
+    message(STATUS "Link and Compile on UNIX")
     target_link_libraries(
         ${main_executable}
         ${Boost_LIBRARIES}
